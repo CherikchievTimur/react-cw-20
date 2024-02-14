@@ -1,7 +1,13 @@
 import React from "react";
+import { useSelector } from "react-redux";
+import ProductCard from "../../components/productCard/ProductCard";
 
 const HomePage = () => {
-    return <div>HomePage</div>
+    const { allItems } = useSelector((state) => state.cart);
+
+    return <div className="product__list">
+        {allItems.map((value, index) => <ProductCard key={index} product={value} />)}
+    </div>
 }
 
 export default HomePage;
