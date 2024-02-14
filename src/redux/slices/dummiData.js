@@ -15,7 +15,7 @@ export const products = [
     name: "Leather Wallet",
     price: 29.99,
     imageUrl: "https://source.unsplash.com/random",
-    stockCount: 30,
+    stockCount: 0,
   },
   {
     name: "Smartphone Case",
