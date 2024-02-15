@@ -7,7 +7,7 @@ const HomePage = () => {
     const { allItems } = useSelector((state) => state.cart);
 
     return <div className="product-list">
-        {allItems.map((value, index) => <ProductCard key={index} product={value} />)}
+        {allItems.map((value) => <ProductCard key={value.id} product={value} />)}
     </div>
 }
 
