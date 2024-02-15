@@ -3,25 +3,56 @@ import { products } from "./dummiData";
 
 const getTotalPrice = (cartItems) => cartItems.reduce((prev, curr) => prev + curr.price * curr.stockCount, 0);
 
-const addToCartItems = (state, action) => {
-    if(action.payload.stockCount <= 0) return state;
+const addToCart = (state, action) => {
+    const { payload: item } = action;
+
+    if (item.stockCount <= 0) return state;
 
     let { allItems, cartItems } = state;
-    const { payload } = action;
-    const itemInCart = cartItems.find((value) => value.id === payload.id);
-
-    allItems = allItems.map((value) => value.id === payload.id ? { ...value, stockCount: value.stockCount - 1 } : value);
+    const itemInCart = cartItems.find((el) => el.id === item.id);
 
     if (itemInCart) {
-        cartItems = cartItems.map((value) => value.id === payload.id ? { ...value, stockCount: value.stockCount + 1 } : value);
+        cartItems = cartItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount + 1 } : el);
     }
     else {
-        cartItems = [...cartItems, { ...payload, stockCount: 1 }]
+        cartItems = [...cartItems, { ...item, stockCount: 1 }];
     }
 
-    console.log(state)
+    allItems = allItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount - 1 } : el);
 
-    return { ...state, allItems: allItems, cartItems: cartItems, totalPrice: getTotalPrice(cartItems) };
+    return { ...state, allItems, cartItems, totalPrice: getTotalPrice(cartItems) };
+}
+
+const removeFromCart = (state, action) => {
+    const { payload: item } = action;
+    let { allItems, cartItems } = state;
+
+    const itemInCart = cartItems.find((el) => el.id === item.id);
+
+    if(!itemInCart) return state;
+
+    if(item.stockCount <= 1) {
+        cartItems.filter((el) => el.id !== item.id);
+    }
+    else {
+        cartItems = cartItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount - 1 } : el);
+    }
+
+    allItems = allItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount + 1 } : el);
+
+    return { ...state, allItems, cartItems, totalPrice: getTotalPrice(cartItems) };
+}
+
+const removeAllFromCart = (state) => {
+    let { allItems, cartItems } = state;
+
+    if(cartItems.length > 0){
+        cartItems.forEach((item) => {
+            allItems = allItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount + item.stockCount } : el);
+        });
+    }
+
+    return { ...state, allItems, cartItems: [], totalPrice: 0 };
 }
 
 export const cartSlice = createSlice({
@@ -32,9 +63,9 @@ export const cartSlice = createSlice({
         totalPrice: 0
     },
     reducers:{
-        addItem: (state, action) => { return addToCartItems(state, action) },
-        removeItem: (state, action) => { },
-        emptyCart: (state) => { },
+        addItem: (state, action) => addToCart(state, action),
+        removeItem: (state, action) => removeFromCart(state, action),
+        emptyCart: (state) => removeAllFromCart(state),
     }
 })
 
