@@ -1,0 +1,11 @@
+@use "../sass/breakpoints";
+
+@mixin flexbox(){
+    display: flex;
+}
+
+@mixin mobileMedia() {
+    @media (max-width: breakpoints.$mobile-screen) {
+        @content;
+    }
+}

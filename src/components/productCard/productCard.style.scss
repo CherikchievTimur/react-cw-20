@@ -1,4 +1,6 @@
 @use "../../sass/colors";
+@use "../../sass/breakpoints";
+@use "../../sass/mixin" as m;
 
 .product{
     border: 1px solid lightgray;
@@ -9,6 +11,15 @@
     &__img {
         border-top-right-radius: .5em;
         border-top-left-radius: .5em;
+    }
+
+    &__name{
+        // @media (min-width: breakpoints.$mobile-screen) {
+        //     background-color: aqua;
+        // }
+        @include m.mobileMedia() {
+            background-color: rgb(185, 255, 127);
+        }
     }
 
     &__price{

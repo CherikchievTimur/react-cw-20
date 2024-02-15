@@ -1,5 +1,7 @@
+@use "../../sass/mixin" as *;
+
 .product-list{
-    display: flex;
+    @include flexbox();
     flex-wrap: wrap;
     gap: 1em;
     margin: 1em;
