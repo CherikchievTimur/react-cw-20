@@ -3,44 +3,52 @@ import { products } from "./dummiData";
 
 const getTotalPrice = (cartItems) => cartItems.reduce((prev, curr) => prev + curr.price * curr.stockCount, 0);
 
+const getItemsInCart = (cartItems) => cartItems.reduce((prev, curr) => prev + curr.stockCount, 0);
+
+const findItemById = (allItems, id) => allItems.find((el) => el.id === id);
+
+const changeStockCount = (allItems, id, count = 1) => allItems.map((el) => el.id === id ? { ...el, stockCount: el.stockCount + count } : el);
+
 const addToCart = (state, action) => {
     const { payload: item } = action;
-
-    if (item.stockCount <= 0) return state;
-
     let { allItems, cartItems } = state;
-    const itemInCart = cartItems.find((el) => el.id === item.id);
+
+    const itemInItems = findItemById(allItems, item.id);
+
+    if (itemInItems.stockCount <= 0) return state;
+
+    const itemInCart = findItemById(cartItems, item.id); 
 
     if (itemInCart) {
-        cartItems = cartItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount + 1 } : el);
+        cartItems = changeStockCount(cartItems, item.id, 1);
     }
     else {
         cartItems = [...cartItems, { ...item, stockCount: 1 }];
     }
 
-    allItems = allItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount - 1 } : el);
+    allItems = changeStockCount(allItems, item.id, -1); 
 
-    return { ...state, allItems, cartItems, totalPrice: getTotalPrice(cartItems) };
+    return { ...state, allItems, cartItems, totalPrice: getTotalPrice(cartItems), totalItems: getItemsInCart(cartItems) };
 }
 
 const removeFromCart = (state, action) => {
     const { payload: item } = action;
     let { allItems, cartItems } = state;
 
-    const itemInCart = cartItems.find((el) => el.id === item.id);
+    const itemInCart = findItemById(cartItems, item.id); 
 
     if(!itemInCart) return state;
 
     if(item.stockCount <= 1) {
-        cartItems.filter((el) => el.id !== item.id);
+        cartItems = cartItems.filter((el) => el.id !== item.id);
     }
     else {
-        cartItems = cartItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount - 1 } : el);
+        cartItems = changeStockCount(cartItems, item.id, -1); 
     }
 
-    allItems = allItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount + 1 } : el);
+    allItems = changeStockCount(allItems, item.id, 1); 
 
-    return { ...state, allItems, cartItems, totalPrice: getTotalPrice(cartItems) };
+    return { ...state, allItems, cartItems, totalPrice: getTotalPrice(cartItems), totalItems: getItemsInCart(cartItems) };
 }
 
 const removeAllFromCart = (state) => {
@@ -48,11 +56,11 @@ const removeAllFromCart = (state) => {
 
     if(cartItems.length > 0){
         cartItems.forEach((item) => {
-            allItems = allItems.map((el) => el.id === item.id ? { ...el, stockCount: el.stockCount + item.stockCount } : el);
+            allItems = changeStockCount(allItems, item.id, item.stockCount); 
         });
     }
 
-    return { ...state, allItems, cartItems: [], totalPrice: 0 };
+    return { ...state, allItems, cartItems: [], totalPrice: 0, totalItems: 0 };
 }
 
 export const cartSlice = createSlice({
@@ -60,12 +68,13 @@ export const cartSlice = createSlice({
     initialState: {
         allItems: products,
         cartItems: [],
+        totalItems: 0,
         totalPrice: 0
     },
     reducers:{
         addItem: (state, action) => addToCart(state, action),
         removeItem: (state, action) => removeFromCart(state, action),
-        emptyCart: (state) => removeAllFromCart(state),
+        emptyCart: (state) => removeAllFromCart(state)
     }
 })
 
